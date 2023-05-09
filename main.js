@@ -7,6 +7,7 @@ class Block {
 		this.data = data;
 		this.prevHash = prevHash;
 		this.hash = this.calculateHash();
+		this.nonce = 0;
 	}
 
 	calculateHash() {
@@ -14,18 +15,32 @@ class Block {
 			this.index +
 				this.prevHash +
 				this.timestamp +
-				JSON.stringify(this.data)
+				JSON.stringify(this.data) +
+				this.nonce
 		).toString();
+	}
+
+	mineBlock(difficulty) {
+		while (
+			this.hash.substring(0, difficulty) !==
+			Array(difficulty + 1).join("0")
+		) {
+			this.nonce++;
+			this.hash = this.calculateHash();
+		}
+
+		console.log("Block mined: " + this.hash);
 	}
 }
 
 class Blockchain {
 	constructor() {
-		this.chain = [this.chain.createGenesisBlock()];
+		this.chain = [this.createGenesisBlock()];
+		this.difficulty = 5;
 	}
 
 	createGenesisBlock() {
-		return new Block(0, "09/05/2023", "BLOCK01", "0");
+		return new Block(0, "09/05/2023", "Genesis Block", "0");
 	}
 
 	getLatestBlock() {
@@ -34,7 +49,7 @@ class Blockchain {
 
 	addBlock(newBlock) {
 		newBlock.prevHash = this.getLatestBlock().hash;
-		newBlock.hash = newBlock.calculateHash();
+		newBlock.mineBlock(this.difficulty);
 		this.chain.push(newBlock);
 	}
 
@@ -54,7 +69,11 @@ class Blockchain {
 
 // Blockchain name: Zaphyr
 let zaphyr = new Blockchain();
+
+console.log("⛏️ Mining block 1...");
 zaphyr.addBlock(new Block(1, "09/05/2023", { amount: 4 }));
+
+console.log("⛏️ Mining block 2...");
 zaphyr.addBlock(new Block(2, "09/05/2023", { amount: 6 }));
 
 // To show blockchain

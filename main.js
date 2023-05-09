@@ -1,10 +1,16 @@
 const SHA256 = require("crypto-js/sha256");
 
+class Transaction {
+	constructor(fromAddress, toAddress, amount) {
+		this.fromAddress = fromAddress;
+		this.toAddress = toAddress;
+		this.amount = amount;
+	}
+}
 class Block {
-	constructor(index, timestamp, data, prevHash = "") {
-		this.index = index;
+	constructor(timestamp, transactions, prevHash = "") {
 		this.timestamp = timestamp;
-		this.data = data;
+		this.transactions = transactions;
 		this.prevHash = prevHash;
 		this.hash = this.calculateHash();
 		this.nonce = 0;
@@ -12,8 +18,7 @@ class Block {
 
 	calculateHash() {
 		return SHA256(
-			this.index +
-				this.prevHash +
+			this.prevHash +
 				this.timestamp +
 				JSON.stringify(this.data) +
 				this.nonce
@@ -36,9 +41,12 @@ class Block {
 class Blockchain {
 	constructor() {
 		this.chain = [this.createGenesisBlock()];
-		this.difficulty = 5;
+		this.difficulty = 2;
+		this.pendingTransactions = [];
+		this.miningReward = 100;
 	}
 
+	// First block of the blockchain (Genesis block)
 	createGenesisBlock() {
 		return new Block(0, "09/05/2023", "Genesis Block", "0");
 	}
@@ -47,12 +55,36 @@ class Blockchain {
 		return this.chain[this.chain.length - 1];
 	}
 
-	addBlock(newBlock) {
-		newBlock.prevHash = this.getLatestBlock().hash;
-		newBlock.mineBlock(this.difficulty);
-		this.chain.push(newBlock);
+	minePendingTransactions(miningRewardAddress) {
+		let block = new Block(Date.new(), this.pendingTransactions);
+		block.mineBlock(this.difficulty);
+
+		console.log("Block successfully mined");
+		this.chain.push(block);
+
+		this.pendingTransactions = [
+			new Transaction(null, this.miningRewardAddress, this.miningReward),
+		];
 	}
 
+	createTransaction(transaction) {
+		this.pendingTransactions.push(transaction);
+	}
+
+	// Get balance of an address
+	getBalanceOfAddress(address) {
+		let balance = 0;
+
+		for (const block of this.chain) {
+			for (const trans of this.block) {
+				if (trans.fromAddress === address) balance -= trans.amount;
+				if (trans.toAddress === address) balance += trans.amount;
+			}
+		}
+		return balance;
+	}
+
+	// Check validity of blockchain
 	isChainValid() {
 		for (let i = 1; i < this.chain.length; i++) {
 			const currentBlock = this.chain[i];
@@ -69,15 +101,3 @@ class Blockchain {
 
 // Blockchain name: Zaphyr
 let zaphyr = new Blockchain();
-
-console.log("⛏️ Mining block 1...");
-zaphyr.addBlock(new Block(1, "09/05/2023", { amount: 4 }));
-
-console.log("⛏️ Mining block 2...");
-zaphyr.addBlock(new Block(2, "09/05/2023", { amount: 6 }));
-
-// To show blockchain
-console.log(JSON.stringify(zaphyr, null, 4));
-
-// To check validity
-console.log("Is Zaphyr valid?: " + zaphyr.isChainValid());

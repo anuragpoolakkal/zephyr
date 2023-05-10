@@ -35,7 +35,7 @@ class Transaction {
 	}
 
 	isValid() {
-		// Mining rewards (fromAddress is null) are valid
+		// Mining rewards (fromAddress === null) are valid
 		if (this.fromAddress === null) return true;
 
 		if (!this.signature || this.signature.length === 0)
@@ -77,9 +77,7 @@ class Block {
 
 	hasValidTransactions() {
 		for (const tx of this.transactions) {
-			if (!tx.isValid()) {
-				return false;
-			}
+			if (!tx.isValid()) return false;
 		}
 		return true;
 	}
@@ -152,7 +150,7 @@ class Blockchain {
 			return false;
 		}
 
-		// Check the remaining blocks if hashes and signatures are correct
+		// Check the remaining blocks to see if hashes and signatures are correct
 		for (let i = 1; i < this.chain.length; i++) {
 			const currentBlock = this.chain[i];
 			const prevBlock = this.chain[(i = 1)];
@@ -168,5 +166,4 @@ class Blockchain {
 	}
 }
 
-module.exports.Blockchain = Blockchain;
-module.exports.Transaction = Transaction;
+module.exports = { Blockchain, Transaction };

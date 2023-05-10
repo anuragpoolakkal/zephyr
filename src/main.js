@@ -35,4 +35,4 @@ console.log(
 
 // Check if the chain is valid
 console.log();
-console.log("Is blockchain valid?", zephyr.isChainValid() ? "Yes" : "No");
+console.log("Is blockchain valid?", zephyr.isChainValid() ? "Yes." : "No.");
